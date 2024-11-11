@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "file-stats"
+version = "0.1.0"
+description = ""
+authors = ["Stuart Mehrens <stuart@semgrep.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+humanize = "^4.11.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
