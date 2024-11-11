@@ -118,8 +118,8 @@ def main():
     parser = argparse.ArgumentParser(description="Analyze file types and sizes in a folder.")
     
     parser.add_argument("folder_path", type=str, help="The path of the folder to analyze.")
-    parser.add_argument("--depth", type=int, default=2, help="Depth to limit the folder path in the report (default is 2).")
-    parser.add_argument("--top-n", type=int, default=5, help="Number of largest files to display per file type (default is 3).")
+    parser.add_argument("--depth", type=int, default=3, help="Depth to limit the folder path in the report (default is 3).")
+    parser.add_argument("--top-n", type=int, default=5, help="Number of largest files to display per file type (default is 5).")
     
     args = parser.parse_args()
     
