@@ -4,7 +4,7 @@ import argparse
 from collections import defaultdict, Counter
 from pathlib import Path
 import heapq
-import humanize  # This will help convert file sizes to human-readable format
+import humanize
 
 def get_file_stats_limited_depth(folder_path, report_depth, top_n_largest_files):
     # Dictionary to store file stats, including the largest files
@@ -56,6 +56,19 @@ def get_file_stats_limited_depth(folder_path, report_depth, top_n_largest_files)
     
     return file_stats_by_depth
 
+def get_overall_stats(file_stats_by_depth):
+    """Aggregate overall stats across all folders."""
+    overall_stats = {
+        "count": Counter(),
+        "size": Counter()
+    }
+    
+    for stats in file_stats_by_depth.values():
+        overall_stats["count"].update(stats["count"])
+        overall_stats["size"].update(stats["size"])
+    
+    return overall_stats
+
 def format_size(size_in_bytes):
     """Convert size in bytes to a human-readable format (e.g., KB, MB, GB)."""
     return humanize.naturalsize(size_in_bytes)
@@ -82,13 +95,31 @@ def print_stats(file_stats, report_depth, top_n_largest_files):
             for file_size, file_path in largest_files:
                 print(f"      {file_path} - {format_size(file_size)}")
 
+def print_overall_stats(overall_stats):
+    """Pretty print the overall file stats, sorted by count and then by total size."""
+    print(f"\n{'='*40}")
+    print(f"{'Overall File Type Summary':^40}")
+    print(f"{'='*40}\n")
+    print(f"{'File Type':<20}{'Count':<10}{'Total Size':<20}")
+    print("-" * 50)
+    
+    # Sort by count first, then by total size if counts are the same
+    sorted_stats = sorted(
+        overall_stats["count"].items(),
+        key=lambda item: (-item[1], -overall_stats["size"][item[0]])
+    )
+    
+    for file_type, count in sorted_stats:
+        total_size = overall_stats["size"][file_type]
+        print(f"{file_type:<20}{count:<10}{format_size(total_size):<20}")
+
 def main():
     # Set up argument parsing
     parser = argparse.ArgumentParser(description="Analyze file types and sizes in a folder.")
     
     parser.add_argument("folder_path", type=str, help="The path of the folder to analyze.")
     parser.add_argument("--depth", type=int, default=2, help="Depth to limit the folder path in the report (default is 2).")
-    parser.add_argument("--top-n", type=int, default=3, help="Number of largest files to display per file type (default is 3).")
+    parser.add_argument("--top-n", type=int, default=5, help="Number of largest files to display per file type (default is 3).")
     
     args = parser.parse_args()
     
@@ -102,8 +133,12 @@ def main():
 
     # Call the file stats function
     file_stats = get_file_stats_limited_depth(folder_path, report_depth, top_n_largest_files)
+
+    # Calculate and print the overall stats
+    overall_stats = get_overall_stats(file_stats)
+    print_overall_stats(overall_stats)
     
-    # Display the results in a pretty format
+    # Display the per-folder results
     print_stats(file_stats, report_depth, top_n_largest_files)
 
 if __name__ == "__main__":
